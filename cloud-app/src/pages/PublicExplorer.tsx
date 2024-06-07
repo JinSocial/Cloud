@@ -98,32 +98,35 @@ function PublicExlorer() {
 				>
 					{files.map(e => (
 						<Menu>
-							<MenuButton _hover={{ backgroundColor: "#e6e6e6" }}>
-								<Stack
-									p={3}
-									direction={"row"}
-									spacing={2}
-									justifyContent={"space-between"}
-									alignItems={"center"}
-								>
-									<Stack alignItems={"center"} direction={"row"} spacing={2}>
-										{e.is_folder ? (
-											<FaFolder size={"24px"} />
-										) : (
-											<FaFile size={"24px"} />
-										)}
-										<Heading textAlign={"left"} size={"sm"}>
-											{e.name}
-										</Heading>
-									</Stack>
+							<Stack direction={"column"}>
+								<MenuButton _hover={{ backgroundColor: "#e6e6e6" }}>
+									<Stack
+										p={3}
+										direction={"row"}
+										spacing={2}
+										justifyContent={"space-between"}
+										alignItems={"center"}
+									>
+										<Stack alignItems={"center"} direction={"row"} spacing={2}>
+											{e.is_folder ? (
+												<FaFolder size={"24px"} />
+											) : (
+												<FaFile size={"24px"} />
+											)}
+											<Heading textAlign={"left"} size={"sm"}>
+												{e.name}
+											</Heading>
+										</Stack>
 
-									<Stack direction={"row"} spacing={2}>
-										<Text textAlign={"end"} opacity={"0.8"}>
-											{moment(e.created_at).format("DD.MM.YYYY HH:mm")}
-										</Text>
+										<Stack direction={"row"} spacing={2}>
+											<Text textAlign={"end"} opacity={"0.8"}>
+												{moment(e.created_at).format("DD.MM.YYYY HH:mm")}
+											</Text>
+										</Stack>
 									</Stack>
-								</Stack>
-							</MenuButton>
+								</MenuButton>
+								{e.headline ? <Text dangerouslySetInnerHTML={{__html: e.headline}}></Text> : <Text></Text>}
+							</Stack>
 							<MenuList>
 								<MenuItem
 									icon={<FaEye />}

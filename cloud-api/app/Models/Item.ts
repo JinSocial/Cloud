@@ -37,4 +37,7 @@ export default class Item extends BaseModel {
 
   @column()
   public text: string | null;
+
+  @column()
+  public headline: string | null;
 }

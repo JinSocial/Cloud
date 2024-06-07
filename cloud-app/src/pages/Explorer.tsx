@@ -19,7 +19,7 @@ import {
 	useToast,
 } from "@chakra-ui/react";
 import moment from "moment";
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
 	FaArrowRightArrowLeft,
 	FaChevronLeft,
@@ -208,35 +208,38 @@ function Explorer() {
 					</Box>
 					{files.map(e => (
 						<Menu>
-							<MenuButton _hover={{ backgroundColor: "#e6e6e6" }}>
-								<Stack
-									p={3}
-									direction={"row"}
-									spacing={2}
-									justifyContent={"space-between"}
-									alignItems={"center"}
-								>
-									<Stack alignItems={"center"} direction={"row"} spacing={2}>
-										{e.is_folder ? (
-											<FaFolder size={"24px"} />
-										) : (
-											<FaFile size={"24px"} />
-										)}
-										<Heading textAlign={"left"} size={"sm"}>
-											{e.name}
-										</Heading>
-									</Stack>
+							<Stack direction={"column"}>
+								<MenuButton _hover={{ backgroundColor: "#e6e6e6" }}>
+									<Stack
+										p={3}
+										direction={"row"}
+										spacing={2}
+										justifyContent={"space-between"}
+										alignItems={"center"}
+									>
+										<Stack alignItems={"center"} direction={"row"} spacing={2}>
+											{e.is_folder ? (
+												<FaFolder size={"24px"} />
+											) : (
+												<FaFile size={"24px"} />
+											)}
+											<Heading textAlign={"left"} size={"sm"}>
+												{e.name}
+											</Heading>
+										</Stack>
 
-									<Stack alignItems={"center"} direction={"row"} spacing={2}>
-										{e.is_public && <IoPeople size={"20px"} />}
-										{e.public_hash && <FaLink size={"20px"} />}
-										{e.is_favorite && <FaStar size={"20px"} />}
-										<Text textAlign={"end"} opacity={"0.8"}>
-											{moment(e.created_at).format("DD.MM.YYYY HH:mm")}
-										</Text>
+										<Stack alignItems={"center"} direction={"row"} spacing={2}>
+											{e.is_public && <IoPeople size={"20px"} />}
+											{e.public_hash && <FaLink size={"20px"} />}
+											{e.is_favorite && <FaStar size={"20px"} />}
+											<Text textAlign={"end"} opacity={"0.8"}>
+												{moment(e.created_at).format("DD.MM.YYYY HH:mm")}
+											</Text>
+										</Stack>
 									</Stack>
-								</Stack>
-							</MenuButton>
+								</MenuButton>
+								{e.headline ? <Text dangerouslySetInnerHTML={{__html: e.headline}}></Text> : <Text></Text>}
+							</Stack>
 							<MenuList>
 								{!e.is_folder && (
 									<>
