@@ -9,6 +9,7 @@ export default class PublicExplorerController {
     }
     const requestSchema = schema.create({
       search: schema.string.optional(),
+      contentSearch: schema.boolean.optional(),
       limit: schema.number([rules.range(1, 100)]),
       page: schema.number(),
       sort: schema.enum(["desc", "asc"] as const),
@@ -21,12 +22,17 @@ export default class PublicExplorerController {
       },
     });
 
-    const items = await Item.query()
+    let query = Item.query()
       .where("is_folder", false)
-      .andWhere("is_public", true)
-      .andWhereRaw(
-        `name like '%${payload.search?.trim().toLowerCase() || ""}%'`
-      )
+      .andWhere("is_public", true);
+
+    if (payload.contentSearch && payload.search != null) {
+      query = query.andWhereRaw(`to_tsvector('russian', text) @@ websearch_to_tsquery('russian', '${payload.search}')`);
+    } else {
+      query = query.andWhereRaw(`name like '%${payload.search?.trim().toLowerCase() || ""}%'`);
+    }
+
+    const items = await query
       .orderBy("created_at", payload.sort)
       .paginate(payload.page, payload.limit);
 

@@ -2,6 +2,7 @@ import {
 	Box,
 	Button,
 	Center,
+	Checkbox,
 	Heading,
 	IconButton,
 	Input,
@@ -78,6 +79,7 @@ function Explorer() {
 	const [files, setFiles] = useState<FileItem[]>([]);
 	const [meta, setMeta] = useState<PaginationMeta | null>();
 	const [search, setSearch] = useState<string>("");
+	const [contentSearch, setContentSearch] = useState<boolean>(true);
 	const [folder, setFolder] = useState<FileItem | null>();
 	const params = useParams();
 	const context = useContext(AppContext);
@@ -93,11 +95,12 @@ function Explorer() {
 	const viewModal = useDisclosure();
 	const [selectedFile, setSelectedFile] = useState<FileItem>();
 
-	const getFiles = async (page: number, search?: string) => {
+	const getFiles = async (page: number, search?: string, contentSearch?: boolean) => {
 		try {
 			const data = await explorer.getFiles(
 				{
 					search,
+					contentSearch,
 					folder_id: params.folder as number | undefined,
 					limit: 50,
 					page,
@@ -121,11 +124,11 @@ function Explorer() {
 
 	useEffect(() => {
 		const delayDebounceFn = setTimeout(() => {
-			getFiles(1, search);
+			getFiles(1, search, contentSearch);
 		}, 500);
 
 		return () => clearTimeout(delayDebounceFn);
-	}, [search]);
+	}, [search, contentSearch]);
 
 	return !meta ? (
 		<Center>
@@ -148,11 +151,16 @@ function Explorer() {
 							icon={<FaChevronLeft />}
 						/>
 					)}
-					<Input
-						placeholder="Поиск..."
-						value={search}
-						onChange={e => setSearch(e.currentTarget.value)}
-					/>
+					<Stack direction={"row"} spacing={4}>
+						<Input
+							placeholder="Поиск..."
+							value={search}
+							onChange={e => setSearch(e.currentTarget.value)}
+						/>
+						<Checkbox size='lg' defaultChecked onChange={e => setContentSearch(e.currentTarget.checked)}>
+							По&nbsp;содержимому
+						</Checkbox>
+					</Stack>
 				</Stack>
 
 				<Stack direction={"row"} spacing={1}>

@@ -1,6 +1,7 @@
 import {
 	Button,
 	Center,
+	Checkbox,
 	Heading,
 	Input,
 	Menu,
@@ -31,6 +32,7 @@ function PublicExlorer() {
 	const [files, setFiles] = useState<FileItem[]>([]);
 	const [meta, setMeta] = useState<PaginationMeta | null>();
 	const [search, setSearch] = useState<string>("");
+	const [contentSearch, setContentSearch] = useState<boolean>(true);
 
 	const context = useContext(AppContext);
 	const [loading, setLoading] = useBoolean();
@@ -40,11 +42,12 @@ function PublicExlorer() {
 	const viewModal = useDisclosure();
 	const [selectedFile, setSelectedFile] = useState<FileItem>();
 
-	const getFiles = async (page: number, search?: string) => {
+	const getFiles = async (page: number, search?: string, contentSearch?: boolean) => {
 		try {
 			const data = await publicExplorer.getFiles(
 				{
 					search,
+					contentSearch,
 					limit: 50,
 					page,
 					sort: "desc",
@@ -60,7 +63,7 @@ function PublicExlorer() {
 
 	useEffect(() => {
 		const delayDebounceFn = setTimeout(() => {
-			getFiles(1, search);
+			getFiles(1, search, contentSearch);
 		}, 500);
 
 		return () => clearTimeout(delayDebounceFn);
@@ -73,12 +76,15 @@ function PublicExlorer() {
 	) : (
 		<>
 			<Stack direction={"row"} justifyContent={"space-between"} spacing={2}>
-				<Stack direction={"row"} spacing={1}>
+				<Stack direction={"row"} spacing={4}>
 					<Input
 						placeholder="Поиск..."
 						value={search}
 						onChange={e => setSearch(e.currentTarget.value)}
 					/>
+					<Checkbox size='lg' defaultChecked onChange={e => setContentSearch(e.currentTarget.checked)}>
+						По&nbsp;содержимому
+					</Checkbox>
 				</Stack>
 			</Stack>
 

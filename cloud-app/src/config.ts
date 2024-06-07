@@ -1,5 +1,5 @@
 const config = {
-	apiUrl: "https://cloud-api.aithercol.com",
+	apiUrl: "http://localhost:3333",
 	appUrl: "https://cloud.aithercol.com",
 };
 

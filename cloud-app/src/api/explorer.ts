@@ -6,6 +6,7 @@ import { FileItem } from "./types/File";
 async function getFiles(
 	params: {
 		search?: string;
+		contentSearch?: boolean;
 		folder_id?: number;
 		limit: number;
 		page: number;

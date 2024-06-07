@@ -34,4 +34,7 @@ export default class Item extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime;
+
+  @column()
+  public text: string | null;
 }

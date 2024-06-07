@@ -3,6 +3,7 @@ import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import { rules, schema } from "@ioc:Adonis/Core/Validator";
 import Item from "App/Models/Item";
 import { md5 } from "App/Utils/Crypto";
+import { getFileContent } from "App/Utils/Files";
 import { generatePassword } from "App/Utils/Random";
 import fs from "fs";
 
@@ -13,6 +14,7 @@ export default class ExplorerController {
     }
     const requestSchema = schema.create({
       search: schema.string.optional(),
+      contentSearch: schema.boolean.optional(),
       folder_id: schema.number.optional(),
       limit: schema.number([rules.range(1, 100)]),
       page: schema.number(),
@@ -33,26 +35,22 @@ export default class ExplorerController {
       }
     }
 
-    let items: Item[] = [];
+    let query = Item.query().where("user_id", auth.user.id);
     if (folder) {
-      items = await Item.query()
-        .where("folder_id", folder.id)
-        .andWhere("user_id", auth.user.id)
-        .andWhereRaw(
-          `name like '%${payload.search?.trim().toLowerCase() || ""}%'`
-        )
-        .orderBy("created_at", payload.sort)
-        .paginate(payload.page, payload.limit);
+      query = query.andWhere("folder_id", folder.id);
     } else {
-      items = await Item.query()
-        .whereNull("folder_id")
-        .andWhere("user_id", auth.user.id)
-        .andWhereRaw(
-          `name like '%${payload.search?.trim().toLowerCase() || ""}%'`
-        )
-        .orderBy("created_at", payload.sort)
-        .paginate(payload.page, payload.limit);
+      query = query.andWhereNull("folder_id");
     }
+
+    if (payload.contentSearch && payload.search != null) {
+      query = query.andWhereRaw(`to_tsvector('russian', text) @@ websearch_to_tsquery('russian', '${payload.search}')`);
+    } else {
+      query = query.andWhereRaw(`name like '%${payload.search?.trim().toLowerCase() || ""}%'`);
+    }
+
+    const items: Item[] = await query
+      .orderBy("created_at", payload.sort)
+      .paginate(payload.page, payload.limit);
 
     return response.send({ errors: null, items, folder });
   }
@@ -202,11 +200,13 @@ export default class ExplorerController {
       }.${new Date().toISOString()}.${generatePassword(6)}`
     );
 
-    await payload.file.move(Application.publicPath(`/files/${hash}`), {
+    const filePath = Application.publicPath(`/files/${hash}`);
+    await payload.file.move(filePath, {
       name: name,
     });
 
     item.file = `/files/${hash}/${name}`;
+    item.text = await getFileContent(filePath, name);
     await item.save();
     await item.refresh();
 
